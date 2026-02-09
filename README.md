@@ -8,3 +8,5 @@ Task created and performed for the indoor video experiment (experiment nº2) of 
 - Create the possibility of adding a scale for answering as per the original implementation of the affective slider
 - Improve the data struct to have more fields
 - Modularize the code even further
+
+%Perguntar sobre os affective sliders e os tests

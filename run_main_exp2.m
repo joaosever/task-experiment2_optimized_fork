@@ -401,6 +401,9 @@ while trial_ <= n
 % -------------------------------------------------------------------------
 %                             Valence
 % -------------------------------------------------------------------------
+
+%TO DO: Change to VAS
+
         case 5 
             % Set the mouse cursor to the center of the screen
             ShowCursor();
@@ -464,7 +467,10 @@ while trial_ <= n
 
 % -------------------------------------------------------------------------
 %                             Arousal
-% -------------------------------------------------------------------------            
+% -------------------------------------------------------------------------     
+
+%TO DO: Change to VAS
+
         case 6
             SetMouse(cfg.screen.centerX, cfg.screen.centerY, cfg.screen.pointer);
             file_arousal = fullfile(cfg.paths.allstim_path,strcat('Score_Arousal', cfg.task.languageSuffix, '.png'));

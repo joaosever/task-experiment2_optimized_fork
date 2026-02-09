@@ -15,6 +15,9 @@ if isempty(user)
   user = getenv('UserName');
 end
 
+% Add a case with my user, make a directory similiar to joaop
+% Remember to ask joaop specifically and add the info here
+
 switch user
     case 'Bruno Miranda'          % Tower computer
 
