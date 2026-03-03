@@ -10,3 +10,8 @@ Task created and performed for the indoor video experiment (experiment nº2) of 
 - Modularize the code even further
 
 %Perguntar sobre os affective sliders e os tests
+
+%Solução:
+
+%1L + 2 colheres de cloreto de potássio e uma de shampô
+%Não usar os que dizem MR
