@@ -43,9 +43,16 @@ event_            = 1;
 
 % Reaction times and choices for valence and arousal
 rt_valence        = zeros(1,n); 
-rt_arousal        = zeros(1,n); 
-choiceValence     = zeros(1,n); 
-choiceArousal     = zeros(1,n);
+rt_arousal        = zeros(1,n);
+
+n = cfg.task.stimsPerRun;
+Q = cfg.rating.items;
+nQ = numel(Q);
+
+resp.choiceIdx  = nan(n, nQ);      % MCQ index; VAS stays NaN
+resp.choiceText = strings(n, nQ);  % MCQ label; VAS stays ""
+resp.vasValue   = nan(n, nQ);      % VAS value -100..100; MCQ stays NaN
+resp.rt         = nan(n, nQ);      % seconds
 stim              = cell(1,n);
 
 % -------------------------------------------------------------------------
@@ -63,6 +70,9 @@ stim              = cell(1,n);
 % DIN5  - parallel_port(5)  -> Valence
 % DIN6  - parallel_port(6)  -> Arousal
 % DIN7  - parallel_port(7)  -> Blank Screen
+% DIN30 - parallel_port(30) -> Questionnaire item onset (generic)
+% DIN31 - parallel_port(31) -> Questionnaire item response (generic)
+Actually send those markers in the code (this is the real change),
 % =========================================================================
 % The same schema is used for NetStation events sent over IP/TCP
 
@@ -396,139 +406,60 @@ while trial_ <= n
             % Eyelink('StopRecording');
             % -------------------------------------------
             event_ = event_ + 1;
-            state = 5;              
+            state = 50;    
 
 % -------------------------------------------------------------------------
-%                             Valence
+%                            Generic case 
 % -------------------------------------------------------------------------
 
-%TO DO: Change to VAS
+        case 50
+            % ---------------- Questionnaire after each video ----------------
+            for qi = 1:numel(cfg.rating.items)
+                item = cfg.rating.items{qi};
 
-        case 5 
-            % Set the mouse cursor to the center of the screen
-            ShowCursor();
-            SetMouse(cfg.screen.centerX, cfg.screen.centerY, cfg.screen.pointer);
-            file_valence = fullfile(cfg.paths.allstim_path,strcat('Score_Valence', cfg.task.languageSuffix, '.png'));
-            % Load the image from the file
-            imageArray_valence = imread(file_valence);
-            % Make texture from the image array
-            texture = Screen('MakeTexture', cfg.screen.pointer, imageArray_valence);
-            % Define the destination rectangle to draw the image in its original size
-            dst_rect_valence = CenterRectOnPointd([0 0 size(imageArray_valence, 2) size(imageArray_valence, 1)], cfg.screen.centerX, cfg.screen.centerY);
-            % Set text size and font
-            Screen('TextSize', cfg.screen.pointer, cfg.format.fontSizeText);
-            Screen('TextFont', cfg.screen.pointer, cfg.format.font);
-            % Draw the texture to the window
-            Screen('DrawTexture', cfg.screen.pointer, texture, [], dst_rect_valence);
-            % Draw circles
-            [start_x,y_position,space_between_circles,circle_radius] = drawCircles(cfg.screen.centerX, cfg.screen.centerY, imageArray_valence, cfg.screen.pointer, 'surround', 0);
-            % Update the display
-            ValenceTime = Screen('Flip', cfg.screen.pointer); 
-            % -------------------------------------------
-            if cfg.info.parallel_port; parallel_port(5); end   % Send to NetStation
-            NetStation('Event','EVEN',ValenceTime, 0.001, 'vale',state); NetStation('FlushReadbuffer');                                                        
-            ev = logEvent(ev, event_, GetSecs(), NaN, 'DIN5', state, start_exp, 500);            
-            % -------------------------------------------            
-            % Initialize variables for circle clicks
-            clicked_in_circle = false;
+                
+                if strcmpi(item.type,'mcq')
+                    [idx, txt, rtSec, ok] = runMCQ(cfg, item.question, item.options);
 
-            while ~clicked_in_circle
-                % Check for mouse clicks
-                [clicks, x, y, ~] = GetClicks(cfg.screen.pointer, 0);
-                if clicks
-                    for i = 1:9
-                        current_x = start_x + (i-1) * space_between_circles;
-                        distance_squared = (x - current_x)^2 + (y - y_position)^2;
-                        if distance_squared <= circle_radius^2
-                            % Compute RT
-                            rt_valence(trial_) = GetSecs() - ValenceTime;
-                            % Redraw all circles
-                            Screen('DrawTexture', cfg.screen.pointer, texture, [], dst_rect_valence);
-                            drawCircles(cfg.screen.centerX, cfg.screen.centerY, imageArray_valence, cfg.screen.pointer, 'surround', i);
-                            tValResp = Screen('Flip', cfg.screen.pointer);
-                            % Send event marker
-                            if cfg.info.parallel_port; parallel_port(20); end   % Send to NetStation
-                            NetStation('Event','EVEN',tValResp, 0.001, 'resv',20); NetStation('FlushReadbuffer'); 
-                            ev = logEvent(ev, event_, GetSecs(), NaN, 'DI20', state, start_exp, 500);                            
-                            % Update the clicked circle index
-                            clicked_in_circle     = true;
-                            choiceValence(trial_) = i;
-                            fprintf('Valence rating is %d\n', choiceValence(trial_))
-                            elCreateVariables(trial_, videoFile, rt_valence(trial_)) % rt in ms
-                            pause(0.5)
-                            break;  % Exit the for loop since circle is found
+                    resp.choiceIdx(trial_, qi)  = idx;
+                    resp.choiceText(trial_, qi) = string(txt);
+                    resp.rt(trial_, qi)         = rtSec;
+
+                elseif strcmpi(item.type,'vas')
+                    imgFile = '';
+                    if isfield(item,'image')
+                        if strcmpi(item.image,'valence')
+                            imgFile = cfg.rating.sam.valence;
+                        elseif strcmpi(item.image,'arousal')
+                            imgFile = cfg.rating.sam.arousal;
                         end
                     end
+
+                    [v, rtSec, ok] = runVAS(cfg, item.question, item.anchors{1}, item.anchors{2}, imgFile);
+
+                    resp.vasValue(trial_, qi) = v;
+                    resp.rt(trial_, qi)       = rtSec;
+
+                else
+                    error('Unknown item type: %s', item.type);
                 end
-            end
-            % -------------------------------------------
-            event_ = event_ + 1;
-            state = 6;
 
-% -------------------------------------------------------------------------
-%                             Arousal
-% -------------------------------------------------------------------------     
-
-%TO DO: Change to VAS
-
-        case 6
-            SetMouse(cfg.screen.centerX, cfg.screen.centerY, cfg.screen.pointer);
-            file_arousal = fullfile(cfg.paths.allstim_path,strcat('Score_Arousal', cfg.task.languageSuffix, '.png'));
-            % Load the image from the file
-            imageArray_arousal = imread(file_arousal);
-            % Make texture from the image array
-            texture = Screen('MakeTexture', cfg.screen.pointer, imageArray_arousal);
-            % Define the destination rectangle to draw the image in its original size
-            dst_rect_arousal = CenterRectOnPointd([0 0 size(imageArray_arousal, 2) size(imageArray_arousal, 1)], cfg.screen.centerX, cfg.screen.centerY);
-            % Set text size and font
-            Screen('TextSize', cfg.screen.pointer, cfg.format.fontSizeText);
-            Screen('TextFont', cfg.screen.pointer, cfg.format.font);
-            % Draw the texture to the window
-            Screen('DrawTexture', cfg.screen.pointer, texture, [], dst_rect_arousal);
-            % Draw circles
-            [start_x,y_position,space_between_circles,circle_radius] = drawCircles(cfg.screen.centerX, cfg.screen.centerY, imageArray_arousal, cfg.screen.pointer, 'surround', 0);
-            % Update the display
-            ArousalTime = Screen('Flip', cfg.screen.pointer);
-            % -------------------------------------------
-            if cfg.info.parallel_port; parallel_port(6); end   % Send to NetStation
-            NetStation('Event','EVEN',ArousalTime, 0.001, 'arou',5); NetStation('FlushReadbuffer');                                                                        
-            ev = logEvent(ev, event_, GetSecs(), NaN, 'DIN6', state, start_exp, 500);            
-            % -------------------------------------------            
-            % Initialize variables for circle clicks
-            clicked_in_circle = false;
-
-            while ~clicked_in_circle
-                % Check for mouse clicks
-                [clicks, x, y, ~] = GetClicks(cfg.screen.pointer, 0);
-                if clicks
-                    for i = 1:9
-                        current_x = start_x + (i-1) * space_between_circles;
-                        distance_squared = (x - current_x)^2 + (y - y_position)^2;
-                        if distance_squared <= circle_radius^2
-                            rt_arousal(trial_)   = GetSecs() - ArousalTime;
-                            % Redraw all circles
-                            Screen('DrawTexture', cfg.screen.pointer, texture, [], dst_rect_arousal);
-                            drawCircles(cfg.screen.centerX, cfg.screen.centerY, imageArray_arousal, cfg.screen.pointer, 'surround', i);
-                            tAroResp = Screen('Flip', cfg.screen.pointer);
-                            % Send event marker
-                            if cfg.info.parallel_port; parallel_port(21); end   % Send to NetStation
-                            NetStation('Event','EVEN',tAroResp, 0.001, 'resa',21); NetStation('FlushReadbuffer'); 
-                            ev = logEvent(ev, event_, GetSecs(), NaN, 'DI21', state, start_exp, 500);                                                        
-                            % Update the clicked circle index                            
-                            clicked_in_circle = true;
-                            choiceArousal(trial_) = i;
-                            fprintf('Arousal rating is %d\n', choiceArousal(trial_))
-                            elCreateVariables(trial_, videoFile, rt_arousal(trial_))
-                            pause(0.5)
-                            HideCursor();  
-                            break;  % Exit the for loop since circle is found
-                        end
-                    end
+                % EEG marker: response (generic)
+                tResp = GetSecs();
+                if ok
+                    if cfg.info.parallel_port; parallel_port(31); end
+                    NetStation('Event','EVEN',tResp, 0.001, 'resp',31); NetStation('FlushReadbuffer');
+                    ev = logEvent(ev, event_, tResp, NaN, 'DI31', 31, start_exp, 500);
+                    event_ = event_ + 1;
                 end
+
+                WaitSecs(0.2);
             end
-            % -------------------------------------------
-            event_ = event_ + 1;
-            state = 7;
+
+            % Done with all questions -> blank screen
+            state = 7;         
+
+
 
 % -------------------------------------------------------------------------
 %                             Blank Screen
@@ -541,7 +472,7 @@ while trial_ <= n
             BlankTime = Screen('Flip', cfg.screen.pointer);
             % -------------------------------------------
             if cfg.info.parallel_port; parallel_port(7); end   % Send to NetStation
-            NetStation('Event','EVEN',BlankTime, 0.001, 'blan',5); NetStation('FlushReadbuffer');                                                                                  
+            NetStation('Event','EVEN',BlankTime, 0.001, 'blan',5); NetStation('FlushReadbuffer');   %May be 7 instead of 5                                                                               
             ev = logEvent(ev, event_, GetSecs(), NaN, 'DIN7', state, start_exp, 500);                            
             % -------------------------------------------
             WaitSecs(1);
@@ -589,40 +520,25 @@ elCleanup();
 %                          Export task data
 % -------------------------------------------------------------------------
 
-% Create log table
 addRunColumn = ones(n,1).*str2double(cfg.input{3});
-addSubColumn = repmat(cfg.input{1}, n, 1); % Add the run and subject columns to the log variables
-% Assuming logOnsets, logDurations, logTypes, logValues, logSamples are your log variables
-logTable = table(addSubColumn, addRunColumn, choiceValence', rt_valence', choiceArousal', rt_arousal', stim',...
-    'VariableNames', {'sub', 'run', 'valence', 'rt_valence', 'arousal', 'rt_arousal', 'stimulus'});
+addSubColumn = repmat(cfg.input{1}, n, 1);
 
-% Compute event duration
-ev = logEventDurations(ev);
-% Create event table
-eventTable = table( ...
-    ev.onsets', ...
-    ev.durations', ...
-    ev.types', ...
-    ev.values', ...
-    ev.samples', ...
-    ev.time', ...
-    'VariableNames', {'onset', 'duration', 'trial_type', 'value', 'sample', 'time'});
-% Remove rows with no event type (unused events)
-emptyRows = cellfun(@isempty, eventTable.trial_type);
-eventTable(emptyRows, :) = [];
+logTable = table(addSubColumn, addRunColumn, stim', ...
+    'VariableNames', {'sub','run','stimulus'});
 
-% Create flip table
-usedRows = 1:flipIdx-1;
+for qi = 1:numel(cfg.rating.items)
+    item = cfg.rating.items{qi};
+    name = matlab.lang.makeValidName(item.name);
 
-flipTable = table( ...
-    flipLog.initial_call(usedRows), ...
-    flipLog.predicted_onset(usedRows), ...
-    flipLog.timestamp_return(usedRows), ...
-    flipLog.missed(usedRows), ...
-    flipLog.beampos(usedRows), ...
-    flipLog.event_code(usedRows), ...
-    'VariableNames', {'initial_call','predicted_onset','timestamp_return','missed','beampos','event_code'});
-
+    if strcmpi(item.type,'mcq')
+        logTable.([name '_idx']) = resp.choiceIdx(:, qi);
+        logTable.([name '_txt']) = resp.choiceText(:, qi);
+        logTable.([name '_rt'])  = resp.rt(:, qi);
+    else
+        logTable.(name)          = resp.vasValue(:, qi); % -100..100
+        logTable.([name '_rt'])  = resp.rt(:, qi);
+    end
+end
 
 % -------------------------------------------------------------------------
 %                          Convert File into TSV
