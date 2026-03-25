@@ -306,7 +306,7 @@ while trial_ <= n
 
                 movie = cfg.stim.moviePntrs(trial_);
                 Screen('SetMovieTimeIndex', movie, 0);
-                Screen('PlayMovie', movie, 1);
+                Screen('PlayMovie', movie, 1, 0, 1.0);
             
                 tex = 0;
                 firstFrameDisplayed = false;
