@@ -8,9 +8,10 @@ function generate_sequences(cfg)
     moveAvi         = false;
     createSequence  = true;
     method          = 'pre-built'; % {'real-time', 'pre-built'};
-    filesForEachRun = 30; % Files for each run (half)
-    numOfRuns       = 2; 
+    filesForEachRun = 3; % Files for each run (half)
+    numOfRuns       = 1; 
 
+    
     % Directories
     cfg.paths.allstim_path   = fullfile(cfg.paths.local.sourcedata, 'supp', 'allStimuli');
     cfg.paths.stim_path      = fullfile(cfg.paths.local.sourcedata, 'supp', 'stimuli');

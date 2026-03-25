@@ -72,7 +72,8 @@ stim              = cell(1,n);
 % DIN7  - parallel_port(7)  -> Blank Screen
 % DIN30 - parallel_port(30) -> Questionnaire item onset (generic)
 % DIN31 - parallel_port(31) -> Questionnaire item response (generic)
-Actually send those markers in the code (this is the real change),
+  
+% Actually send those markers in the code (this is the real change),
 % =========================================================================
 % The same schema is used for NetStation events sent over IP/TCP
 
@@ -197,7 +198,7 @@ while trial_ <= n
             tFixation = Screen('Flip', cfg.screen.pointer);
             % -------------------------------------------
             if cfg.info.parallel_port; parallel_port(98); end   % Send to NetStation
-            NetStation('Event','EVEN',tFixation, 0.001,'cros',state); NetStation('FlushReadbuffer'); 
+            NetStation('Event','EVEN',tFixation, 0.001,'cros',state); %NetStation('FlushReadbuffer'); 
             ev = logEvent(ev, event_, GetSecs(), NaN, 'DI98', state, start_exp, 500);
             Eyelink('Message','Eyes Closed');
             Eyelink('command','record_status_message "Eyes Closed"')
@@ -229,7 +230,7 @@ while trial_ <= n
             tFixation = Screen('Flip', cfg.screen.pointer);
             % -------------------------------------------            
             if cfg.info.parallel_port; parallel_port(97); end   % Send to NetStation
-            NetStation('Event','EVEN',tFixation, 0.001,'cros',state); NetStation('FlushReadbuffer'); 
+            NetStation('Event','EVEN',tFixation, 0.001,'cros',state); %NetStation('FlushReadbuffer'); 
             ev = logEvent(ev, event_, GetSecs(), NaN, 'DI97', state, start_exp, 500);
             Eyelink('Message','Eyes Open');
             Eyelink('command','record_status_message "Eyes Open"')
@@ -253,7 +254,7 @@ while trial_ <= n
             InitialDisplayTime = Screen('Flip', cfg.screen.pointer);
             % EEG
             if cfg.info.parallel_port; parallel_port(1); end   % Send to NetStation
-            NetStation('Event','EVEN',InitialDisplayTime, 0.001, 'mess',1); NetStation('FlushReadbuffer'); 
+            NetStation('Event','EVEN',InitialDisplayTime, 0.001, 'mess',1); %NetStation('FlushReadbuffer'); 
             ev = logEvent(ev, event_, GetSecs(), NaN, 'DIN1', state, start_exp, 500);
             % ------------------------------------------- EL
             Eyelink('Message', 'TRIALID %d', trial_);
@@ -276,7 +277,7 @@ while trial_ <= n
             drawCross(cfg.screen.pointer, cfg.screen.resolx, cfg.screen.resoly);
             tFixation = Screen('Flip', cfg.screen.pointer);
             if cfg.info.parallel_port; parallel_port(2); end   % Send to NetStation            
-            NetStation('Event','EVEN',tFixation, 0.001, 'cros',state); NetStation('FlushReadbuffer');
+            NetStation('Event','EVEN',tFixation, 0.001, 'cros',state); %NetStation('FlushReadbuffer');
             % NetStation('Event','EVEN',StimulusOnsetTime, 0.001, 'most',state); NetStation('FlushReadbuffer');              
             Eyelink('Message','EEGSYNCH_%d',state);
             ev = logEvent(ev, event_, GetSecs(), NaN, 'DIN2', state, start_exp, 500);
@@ -322,7 +323,7 @@ while trial_ <= n
                         % ---- SEND EVENT EXACTLY ON FIRST FRAME ----
                         if ~firstFrameDisplayed
                             if cfg.info.parallel_port; parallel_port(3); end   % Send to NetStation
-                            NetStation('Event','EVEN',InitialDisplayTime, 0.001, 'stim',state); NetStation('FlushReadbuffer');           
+                            NetStation('Event','EVEN',InitialDisplayTime, 0.001, 'stim',state); %NetStation('FlushReadbuffer');           
                             Eyelink('Message', sprintf('EEG_SYNCH_%d', state)) % for post-hoc EEG synch
                             ev = logEvent(ev, event_, GetSecs(), NaN, 'DIN3', state, start_exp, 500);            
                             firstFrameDisplayed = true;
@@ -358,7 +359,7 @@ while trial_ <= n
                         tMovie = Screen('Flip', cfg.screen.pointer);  % Update the screen to show the first frame
                         % -------------------------------------------
                         if cfg.info.parallel_port; parallel_port(3); end   % Send to NetStation
-                        NetStation('Event','EVEN',tMovie, 0.001, 'stim',3); NetStation('FlushReadbuffer');                        
+                        NetStation('Event','EVEN',tMovie, 0.001, 'stim',3); %NetStation('FlushReadbuffer');                        
                         ev = logEvent(ev, event_, GetSecs(), NaN, 'DIN3', state, start_exp, 500);            
                         % -------------------------------------------
                         % There is no need to hold the first frame since the first frame is already paused for 1 second in the video itself
@@ -371,7 +372,7 @@ while trial_ <= n
                     Screen('PlayMovie', movie, 1, 0);  % Start playback at normal speed from the current position
                     % -------------------------------------------
                     if cfg.info.parallel_port; parallel_port(4); end   % Send to NetStation
-                    NetStation('Event','EVEN',GetSecs() - start_exp, 0.001, 'stim',4); NetStation('FlushReadbuffer');                                        
+                    NetStation('Event','EVEN',GetSecs() - start_exp, 0.001, 'stim',4); %NetStation('FlushReadbuffer');                                        
                     ev = logEvent(ev, event_, GetSecs(), NaN, 'DIN4', state, start_exp, 500);            
                     % -------------------------------------------
                     % Further video playback code handling remains unchanged as per your original setup
@@ -448,7 +449,7 @@ while trial_ <= n
                 tResp = GetSecs();
                 if ok
                     if cfg.info.parallel_port; parallel_port(31); end
-                    NetStation('Event','EVEN',tResp, 0.001, 'resp',31); NetStation('FlushReadbuffer');
+                    NetStation('Event','EVEN',tResp, 0.001, 'resp',31); %NetStation('FlushReadbuffer');
                     ev = logEvent(ev, event_, tResp, NaN, 'DI31', 31, start_exp, 500);
                     event_ = event_ + 1;
                 end
@@ -472,7 +473,7 @@ while trial_ <= n
             BlankTime = Screen('Flip', cfg.screen.pointer);
             % -------------------------------------------
             if cfg.info.parallel_port; parallel_port(7); end   % Send to NetStation
-            NetStation('Event','EVEN',BlankTime, 0.001, 'blan',5); NetStation('FlushReadbuffer');   %May be 7 instead of 5                                                                               
+            NetStation('Event','EVEN',BlankTime, 0.001, 'blan',5); %NetStation('FlushReadbuffer');   %May be 7 instead of 5                                                                               
             ev = logEvent(ev, event_, GetSecs(), NaN, 'DIN7', state, start_exp, 500);                            
             % -------------------------------------------
             WaitSecs(1);
@@ -540,6 +541,19 @@ for qi = 1:numel(cfg.rating.items)
     end
 end
 
+eventTable = table( ...
+    ev.onsets', ...
+    ev.durations', ...
+    ev.types', ...
+    ev.values', ...
+    ev.samples', ...
+    ev.time', ...
+    'VariableNames', {'onset', 'duration', 'trial_type', 'value', 'sample', 'time'});
+% Remove rows with no event type (unused events)
+emptyRows = cellfun(@isempty, eventTable.trial_type);
+eventTable(emptyRows, :) = [];
+
+
 % -------------------------------------------------------------------------
 %                          Convert File into TSV
 % -------------------------------------------------------------------------
@@ -548,7 +562,7 @@ if cfg.export.exportTsv
     % Write the log table to a TSV file
     writetable(logTable, [cfg.paths.logs_path filesep cfg.text.logFileName '.tsv'], 'FileType', 'text', 'Delimiter', '\t');
     writetable(eventTable, [cfg.paths.event_path filesep cfg.text.eventFileName '.tsv'], 'FileType', 'text', 'Delimiter', '\t');    
-    writetable(flipTable, [cfg.paths.event_path filesep cfg.text.flipFileName '.tsv'], 'FileType', 'text', 'Delimiter', '\t');        
+    %writetable(flipTable, [cfg.paths.event_path filesep cfg.text.flipFileName '.tsv'], 'FileType', 'text', 'Delimiter', '\t');        
 end
 
 % -------------------------------------------------------------------------
@@ -559,7 +573,7 @@ if cfg.export.exportXlsx
     % Write table
     writetable(logTable, [cfg.paths.logs_path filesep cfg.text.logFileName '.xlsx']);
     writetable(eventTable, [cfg.paths.event_path filesep cfg.text.eventFileName '.xlsx']);    
-    writetable(flipTable, [cfg.paths.event_path filesep cfg.text.flipFileName '.xlsx']);
+    %writetable(flipTable, [cfg.paths.event_path filesep cfg.text.flipFileName '.xlsx']);
 end
 
 

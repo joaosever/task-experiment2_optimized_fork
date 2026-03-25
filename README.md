@@ -15,3 +15,12 @@ Task created and performed for the indoor video experiment (experiment nº2) of 
 
 %1L + 2 colheres de cloreto de potássio e uma de shampô
 %Não usar os que dizem MR
+
+%TO DO:
+
+%Pôr som
+%Pôr confirmação de resposta
+%Pôr tempo entre VAS para evitar cliques acidentais
+%Tratar da eventTable
+%Pôr datetime ao milisegundo
+%Pôr os dados metafisiológicos

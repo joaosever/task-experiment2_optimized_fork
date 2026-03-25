@@ -21,8 +21,8 @@ end
 switch user
     case 'Bruno Miranda'          % Tower computer
 
-        cfg.paths.remote.study = 'Z:\Exp_2-optimized_video_rating'; % LAN
-        cfg.paths.local.study  = 'C:\Exp_2_optimized-video_rating'; % Local
+        cfg.paths.remote.study = 'Z:\Exp_2-food_triggers'; % LAN
+        cfg.paths.local.study  = 'C:\Exp_2_food_triggers'; % Local
         
         try
             cd(cfg.paths.remote.study); 
@@ -47,15 +47,16 @@ switch user
    
         % add to path
         addpath('C:\toolbox\Psychtoolbox')
-        addpath('C:\toolbox\fieldtrip-20241025')
-        addpath('C:\toolbox\eeglab2024.2')
+        addpath('C:\toolbox\fieldtrip')
+        addpath('C:\toolbox\eeglab2025.1.0')
+       
 
 
     case 'NGR_FMUL'          % VR-accelerated computer
 
 
-        cfg.paths.remote.study = 'Z:\Exp_2-optimized_video_rating'; % LAN
-        cfg.paths.local.study  = 'C:\Exp_2_optimized-video_rating'; % Local
+        cfg.paths.remote.study = 'Z:\Exp_2-food_triggers'; % LAN
+        cfg.paths.local.study  = 'C:\Exp_2_food_triggers'; % Local
         
         try
             cd(cfg.paths.remote.study); 
@@ -77,8 +78,8 @@ switch user
 
     case 'joaop'          % Personal computer
 
-        cfg.paths.remote.study = 'Z:\Exp_2-optimized_video_rating'; % LAN
-        cfg.paths.local.study  = 'C:\Exp_2_optimized-video_rating'; % Local
+        cfg.paths.remote.study = 'Z:\Exp_2-food_triggers'; % LAN
+        cfg.paths.local.study  = 'C:\Exp_2_food_triggers'; % Local
         
         try
             cd(cfg.paths.remote.study); 
@@ -100,8 +101,8 @@ switch user
 
     case 'Administrator' % MSI computer
 
-        cfg.paths.remote.study = 'Z:\Exp_2-optimized_video_rating'; % LAN
-        cfg.paths.local.study  = 'C:\Exp_2_optimized-video_rating'; % Local
+        cfg.paths.remote.study = 'Z:\Exp_2-food_triggers'; % LAN
+        cfg.paths.local.study  = 'C:\Exp_2_food_triggers'; % Local
         
         try
             cd(cfg.paths.remote.study); 
