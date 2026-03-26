@@ -34,8 +34,8 @@ tOnset = Screen('Flip', win);
 
 if cfg.info.parallel_port; parallel_port(30); end
 NetStation('Event','EVEN', tOnset, 0.001, 'ques',30); %NetStation('FlushReadbuffer');
-ev = logEvent(ev, event_, tResp, NaN, 'DI30', 30, start_exp, 500);
-event_ = event_ + 1;
+%ev = logEvent(ev, event_, tResp, NaN, 'DI30', 30, start_exp, 500);
+%event_ = event_ + 1;
 
 choiceIdx = NaN;
 choiceText = '';

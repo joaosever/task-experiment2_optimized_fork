@@ -312,6 +312,7 @@ if cfg.stim.isVideo
     % foreach ($f in Get-ChildItem *.avi) {
     % ffmpeg -i $f.FullName -an -pix_fmt yuv420p -c:v libx264 -profile:v high -preset fast -crf 17 -r 30 -movflags +faststart ($f.BaseName + ".mp4")
     % }
+
     disp('Preloading videos...')
     cfg.stim.moviePntrs = zeros(numel(cfg.sequences.files),1);
 

@@ -306,7 +306,7 @@ while trial_ <= n
 
                 movie = cfg.stim.moviePntrs(trial_);
                 Screen('SetMovieTimeIndex', movie, 0);
-                Screen('PlayMovie', movie, 1, 0, 1.0);
+                Screen('PlayMovie', movie, 1);
             
                 tex = 0;
                 firstFrameDisplayed = false;
@@ -349,7 +349,7 @@ while trial_ <= n
 
                 try
                     % Open the movie, start playback paused
-                    movie = Screen('OpenMovie', cfg.screen.pointer, file, 0, inf, 2);
+                    movie = Screen('OpenMovie', cfg.screen.pointer, file);
                     Screen('SetMovieTimeIndex', movie, 0);  %Ensure the movie starts at the very beginning
     
                     % Get the first frame and display it
