@@ -314,8 +314,8 @@ case 96
 % -------------------------------------------------------------------------
 %                             Video
 % -------------------------------------------------------------------------
+ 
         case 3
-
             % important to select the correct sequence of videos
             videoFile    = cfg.sequences.files{trial_}; 
             file         = fullfile(cfg.paths.stim_path, videoFile);
@@ -433,6 +433,7 @@ case 96
             % -------------------------------------------
             event_ = event_ + 1;
             state = 50;    
+
 
 % -------------------------------------------------------------------------
 %                            Generic case 
