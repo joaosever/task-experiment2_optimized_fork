@@ -546,22 +546,22 @@ elCleanup();
 %                          Export task data
 % -------------------------------------------------------------------------
 
-addRunColumn = ones(n,1).*str2double(cfg.input{3});
-addSubColumn = repmat(cfg.input{1}, n, 1);
+% Create base table
+addSubColumn = repmat(string(cfg.input{1}), n, 1); % string array
+addRunColumn = repmat(str2double(cfg.input{3}), n, 1); % numeric
 
 logTable = table(addSubColumn, addRunColumn, stim', ...
     'VariableNames', {'sub','run','stimulus'});
 
+% Add initial VAS responses (physiological + meta-physio)
 
 for qi = 1:numel(cfg.init.items)
     item = cfg.init.items{qi};
     name = matlab.lang.makeValidName(item.name);
 
-    logTable.(name)          = resp.vasValue(:, qi); % -100..100
-    logTable.([name '_rt'])  = resp.rt(:, qi);
-    
+    logTable.(name)         = ones(n,1) * initResp.values(qi);
+    logTable.([name '_rt']) = ones(n,1) * initResp.rt(qi);
 end
-
 
 for qi = 1:numel(cfg.rating.items)
     item = cfg.rating.items{qi};

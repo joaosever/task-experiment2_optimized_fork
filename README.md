@@ -24,6 +24,5 @@ Task created and performed for the indoor video experiment (experiment nº2) of 
 %Resolver DIN31
 %Resolver DIN30
 %Pôr datetime ao milisegundo
-%Arranjar log table error
 %Resolver ev 
 %Trata dos latin squares
