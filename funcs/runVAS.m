@@ -42,17 +42,16 @@ if ~isempty(imageFile) && isfile(imageFile)
     dstRect = CenterRectOnPointd([0 0 imgW*scale imgH*scale], xCenter, yCenter - cfg.screen.resoly*0.05);
 end
 
-drawFrame();
+drawFrame(fg);
 tOnset = Screen('Flip', win);
 
 if cfg.info.parallel_port; parallel_port(30); end
-NetStation('Event','EVEN', tOnset, 0.001, 'ques',30); %NetStation('FlushReadbuffer');
-%ev = logEvent(ev, event_, tResp, NaN, 'DI30', 30, start_exp, 500);
-%event_ = event_ + 1;
+NetStation('Event','EVEN', tOnset, 0.001, 'ques',30);
 
 confirmed = 0;
 valueNegPos = NaN;
 rt = NaN;
+confirmationColor = [0 255 0]; 
 
 while ~confirmed
     [keyIsDown, ~, keyCode] = KbCheck;
@@ -72,21 +71,31 @@ while ~confirmed
         confirmed = 1;
     end
 
-    drawFrame();
+    drawFrame(fg); % normal knob color
     Screen('Flip', win);
 end
 
+% --- CONFIRMATION VISUAL ---
 rt = GetSecs() - tOnset;
-
 frac = (knobX - sliderX1) / (sliderX2 - sliderX1);
 valueNegPos = (frac * 200) - 100;
+
+% Draw the knob in green for 0.4s
+
+drawFrame(confirmationColor);
+Screen('Flip', win);
+WaitSecs(0.4); % short gap to avoid double-click
 
 cleanupTex();
 HideCursor();
 
-    function drawFrame()
-        Screen('FillRect', win, bg);
 
+    function drawFrame(knobColor)
+        if nargin < 1
+            knobColor = fg; % default color
+        end
+
+        Screen('FillRect', win, bg);
         DrawFormattedText(win, questionText, 'center', round(cfg.screen.resoly*0.12), fg);
 
         if ~isempty(tex)
@@ -99,7 +108,7 @@ HideCursor();
         Screen('DrawLine', win, fg, sliderX1, sliderY, sliderX2, sliderY, lineWidthPx);
         Screen('DrawLine', win, fg, xCenter, sliderY - 15, xCenter, sliderY + 15, 3);
 
-        Screen('FillOval', win, fg, [knobX-knobRadiusPx, sliderY-knobRadiusPx, knobX+knobRadiusPx, sliderY+knobRadiusPx]);
+        Screen('FillOval', win, knobColor, [knobX-knobRadiusPx, sliderY-knobRadiusPx, knobX+knobRadiusPx, sliderY+knobRadiusPx]);
 
         frac = (knobX - sliderX1) / (sliderX2 - sliderX1);
         v = (frac * 200) - 100;

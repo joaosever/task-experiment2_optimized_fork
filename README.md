@@ -19,8 +19,6 @@ Task created and performed for the indoor video experiment (experiment nº2) of 
 %TO DO:
 
 %Pôr som
-%Pôr confirmação de resposta
-%Pôr tempo entre VAS para evitar cliques acidentais
 %Resolver DIN31
 %Resolver DIN30
 %Pôr datetime ao milisegundo
