@@ -34,11 +34,32 @@ cfg.paths.event_path    = fullfile(cfg.paths.sourcedata, 'supp', 'events');
 cfg.paths.sequence_path = fullfile(cfg.paths.sourcedata, 'supp', 'sequences');
 cfg.paths.data_path     = fullfile(cfg.paths.sourcedata, 'data');
 
-% SAM mannekins path
+% SAM mannekins path unused so far
+
 cfg.paths.rating_images = cfg.paths.allstim_path; 
 
 cfg.rating.sam.valence = fullfile(cfg.paths.rating_images, 'valence.png');
 cfg.rating.sam.arousal = fullfile(cfg.paths.rating_images, 'arousal.png');
+
+%Initial physiological and meta physiological VAS
+
+cfg.init.items = cell(4,1);
+
+cfg.init.items{1} = struct('type','vas','name','hunger', ...
+    'question','How hungry are you at this moment?', ...
+    'anchors',{{'Not hungry at all','Very hungry'}});
+
+cfg.init.items{2} = struct('type','vas','name','thirst', ...
+    'question','How thirsty are you at this moment?', ...
+    'anchors',{{'Not thirsty at all','Very thirsty'}});
+
+cfg.init.items{3} = struct('type','vas','name','sleepiness', ...
+    'question','How sleepy are you at this moment?', ...
+    'anchors',{{'Not sleepy at all','Very sleepy'}});
+
+cfg.init.items{4} = struct('type','vas','name','happiness', ...
+    'question','How happy are you at this moment?', ...
+    'anchors',{{'Not happy at all','Very happy'}});
 
 %Building the questions
 cfg.rating.items = cell(17,1);
@@ -79,6 +100,8 @@ cfg.rating.items{16} = struct('type','vas','name','health',      'question','How
                               'anchors',{{'Very unhealthy','Very healthy'}});
 cfg.rating.items{17} = struct('type','vas','name','want_eat',    'question','How much would you like to eat the food item you saw?', ...
                               'anchors',{{'Not at all','Extremely'}});
+
+
 
 % Setup Information
 cfg.info.matlab = matlabRelease();

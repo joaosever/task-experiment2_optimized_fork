@@ -55,6 +55,10 @@ resp.vasValue   = nan(n, nQ);      % VAS value -100..100; MCQ stays NaN
 resp.rt         = nan(n, nQ);      % seconds
 stim              = cell(1,n);
 
+nInit = numel(cfg.init.items);     %Logs of the physiological and meta physiological states
+initResp.values = nan(1, nInit);
+initResp.rt     = nan(1, nInit);
+
 % -------------------------------------------------------------------------
 %                       Set variables for event files
 % -------------------------------------------------------------------------
@@ -70,6 +74,7 @@ stim              = cell(1,n);
 % DIN5  - parallel_port(5)  -> Valence
 % DIN6  - parallel_port(6)  -> Arousal
 % DIN7  - parallel_port(7)  -> Blank Screen
+% DIN29 - parallel_port(29) -> Physiological and Meta state onset
 % DIN30 - parallel_port(30) -> Questionnaire item onset (generic)
 % DIN31 - parallel_port(31) -> Questionnaire item response (generic)
   
@@ -237,7 +242,27 @@ while trial_ <= n
             % -------------------------------------------
             WaitSecs(cfg.task.eyes_open_duration);
             event_ = event_ + 1;
-            state  = 1;
+            state  = 96;
+
+% -------------------------------------------------------------------------
+%                 INITIAL PHYSIOLOGICAL AND METAPHYSIOLOGICAL STATE VAS
+% -------------------------------------------------------------------------
+case 96
+
+    Eyelink('Message','Initial State Ratings');
+
+    % Run initial VAS block
+    initResp = runInitState(cfg);
+
+    % EEG marker
+    tInit = GetSecs();
+    if cfg.info.parallel_port; parallel_port(30); end
+    NetStation('Event','EVEN', tInit, 0.001, 'init',30);
+
+    ev = logEvent(ev, event_, tInit, NaN, 'DI30', 30, start_exp, 500);
+    event_ = event_ + 1;
+
+    state = 1;
 
 % -------------------------------------------------------------------------
 %                             Message
@@ -349,7 +374,7 @@ while trial_ <= n
 
                 try
                     % Open the movie, start playback paused
-                    movie = Screen('OpenMovie', cfg.screen.pointer, file);
+                    movie = Screen('OpenMovie', cfg.screen.pointer, file, 0, inf, 2);
                     Screen('SetMovieTimeIndex', movie, 0);  %Ensure the movie starts at the very beginning
     
                     % Get the first frame and display it
@@ -526,6 +551,17 @@ addSubColumn = repmat(cfg.input{1}, n, 1);
 
 logTable = table(addSubColumn, addRunColumn, stim', ...
     'VariableNames', {'sub','run','stimulus'});
+
+
+for qi = 1:numel(cfg.init.items)
+    item = cfg.init.items{qi};
+    name = matlab.lang.makeValidName(item.name);
+
+    logTable.(name)          = resp.vasValue(:, qi); % -100..100
+    logTable.([name '_rt'])  = resp.rt(:, qi);
+    
+end
+
 
 for qi = 1:numel(cfg.rating.items)
     item = cfg.rating.items{qi};
