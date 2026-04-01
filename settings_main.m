@@ -1,6 +1,7 @@
 function cfg = settings_main()
 % function containing settings for running the main task
 
+
 % Init pc-specific paths and variables via setpath
 cfg = setpath();
 
@@ -126,7 +127,7 @@ cfg.format.stimSize         = 2/3; % proportion of full screen
 cfg.format.fontSizeText     = 40;
 cfg.format.fontSizeFixation = 120;
 cfg.format.font             = 'Arial';
-cfg.format.backgroundColor  = [255 255 255]; % grey is 150!
+cfg.format.backgroundColor  = [235 230 220]; % grey is 150!
 cfg.format.foregroundColor  = [0 0 0]; % black
 cfg.format.textColor        = 0;  % Text color: choose a number from 0 (black) to 255 (white)
 
@@ -333,7 +334,7 @@ if cfg.stim.isVideo
     % cache videos to improve performance
     % Videos standardized with ffmpeg
     % foreach ($f in Get-ChildItem *.avi) {
-    % ffmpeg -i $f.FullName -an -pix_fmt yuv420p -c:v libx264 -profile:v high -preset fast -crf 17 -r 30 -movflags +faststart ($f.BaseName + ".mp4")
+    % ffmpeg -i input.mp4 -pix_fmt yuv420p -c:v libx264 -profile:v high -preset fast -crf 17 -r 30 -c:a aac -b:a 192k -movflags +faststart output.mp4
     % }
 
     disp('Preloading videos...')
@@ -341,7 +342,7 @@ if cfg.stim.isVideo
 
     for t = 1:numel(cfg.sequences.files)
         file = fullfile(cfg.paths.stim_path, cfg.sequences.files{t});
-        cfg.stim.moviePntrs(t) = Screen('OpenMovie', cfg.screen.pointer, file, 0, inf, 2);
+        cfg.stim.moviePntrs(t) = Screen('OpenMovie', cfg.screen.pointer, file,0,inf,2);
         Screen('SetMovieTimeIndex', cfg.stim.moviePntrs(t), 0);
     end
     cfg.stim.preloaded = true;

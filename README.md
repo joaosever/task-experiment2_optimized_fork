@@ -19,8 +19,9 @@ Task created and performed for the indoor video experiment (experiment nº2) of 
 %TO DO:
 
 %Pôr som
-%Resolver DIN31
-%Resolver DIN30
 %Pôr datetime ao milisegundo
 %Resolver ev 
+%Trata do CAD
+
+%Para depois do pilot
 %Trata dos latin squares

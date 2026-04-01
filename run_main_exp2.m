@@ -374,7 +374,7 @@ case 96
 
                 try
                     % Open the movie, start playback paused
-                    movie = Screen('OpenMovie', cfg.screen.pointer, file, 0, inf, 2);
+                    movie = Screen('OpenMovie', cfg.screen.pointer, file,0,inf,2);
                     Screen('SetMovieTimeIndex', movie, 0);  %Ensure the movie starts at the very beginning
     
                     % Get the first frame and display it
