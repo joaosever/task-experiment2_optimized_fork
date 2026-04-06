@@ -160,7 +160,7 @@ while trial_ <= n
             end
             % -------------------------------------------
             if cfg.info.parallel_port; parallel_port(99); end   % Send to NetStation
-            ev = logEvent(ev, event_, GetSecs(), NaN, 'DI99', state, start_exp, 500);
+            ev = logEvent(ev, event_, GetSecs(), NaN, 'emp_sync', state, start_exp, 500);
             % -------------------------------------------
             countdown_from = 5; % Start countdown from 10
             for i = countdown_from:-1:1
@@ -204,7 +204,7 @@ while trial_ <= n
             % -------------------------------------------
             if cfg.info.parallel_port; parallel_port(98); end   % Send to NetStation
             NetStation('Event','EVEN',tFixation, 0.001,'cros',state); %NetStation('FlushReadbuffer'); 
-            ev = logEvent(ev, event_, GetSecs(), NaN, 'DI98', state, start_exp, 500);
+            ev = logEvent(ev, event_, GetSecs(), NaN, 'close', state, start_exp, 500);
             Eyelink('Message','Eyes Closed');
             Eyelink('command','record_status_message "Eyes Closed"')
             % -------------------------------------------
@@ -236,7 +236,7 @@ while trial_ <= n
             % -------------------------------------------            
             if cfg.info.parallel_port; parallel_port(97); end   % Send to NetStation
             NetStation('Event','EVEN',tFixation, 0.001,'cros',state); %NetStation('FlushReadbuffer'); 
-            ev = logEvent(ev, event_, GetSecs(), NaN, 'DI97', state, start_exp, 500);
+            ev = logEvent(ev, event_, GetSecs(), NaN, 'open', state, start_exp, 500);
             Eyelink('Message','Eyes Open');
             Eyelink('command','record_status_message "Eyes Open"')
             % -------------------------------------------
@@ -259,7 +259,7 @@ case 96
     if cfg.info.parallel_port; parallel_port(30); end
     NetStation('Event','EVEN', tInit, 0.001, 'init',30);
 
-    ev = logEvent(ev, event_, tInit, NaN, 'DI30', 30, start_exp, 500);
+    ev = logEvent(ev, event_, tInit, NaN, 'meta', 30, start_exp, 500);
     event_ = event_ + 1;
 
     state = 1;
@@ -280,7 +280,7 @@ case 96
             % EEG
             if cfg.info.parallel_port; parallel_port(1); end   % Send to NetStation
             NetStation('Event','EVEN',InitialDisplayTime, 0.001, 'mess',1); %NetStation('FlushReadbuffer'); 
-            ev = logEvent(ev, event_, GetSecs(), NaN, 'DIN1', state, start_exp, 500);
+            ev = logEvent(ev, event_, GetSecs(), NaN, 'message', state, start_exp, 500);
             % ------------------------------------------- EL
             Eyelink('Message', 'TRIALID %d', trial_);
             Eyelink('Message', '!V CLEAR %d %d %d', cfg.el.backgroundcolour(1), cfg.el.backgroundcolour(2), cfg.el.backgroundcolour(3));
@@ -305,7 +305,7 @@ case 96
             NetStation('Event','EVEN',tFixation, 0.001, 'cros',state); %NetStation('FlushReadbuffer');
             % NetStation('Event','EVEN',StimulusOnsetTime, 0.001, 'most',state); NetStation('FlushReadbuffer');              
             Eyelink('Message','EEGSYNCH_%d',state);
-            ev = logEvent(ev, event_, GetSecs(), NaN, 'DIN2', state, start_exp, 500);
+            ev = logEvent(ev, event_, GetSecs(), NaN, 'cross', state, start_exp, 500);
             % -------------------------------------------
             WaitSecs(1);
             event_ = event_ + 1;
@@ -350,7 +350,7 @@ case 96
                             if cfg.info.parallel_port; parallel_port(3); end   % Send to NetStation
                             NetStation('Event','EVEN',InitialDisplayTime, 0.001, 'stim',state); %NetStation('FlushReadbuffer');           
                             Eyelink('Message', sprintf('EEG_SYNCH_%d', state)) % for post-hoc EEG synch
-                            ev = logEvent(ev, event_, GetSecs(), NaN, 'DIN3', state, start_exp, 500);            
+                            ev = logEvent(ev, event_, GetSecs(), NaN, 'video', state, start_exp, 500);            
                             firstFrameDisplayed = true;
                         end
                         % Log flips (useful for videos)
@@ -385,7 +385,7 @@ case 96
                         % -------------------------------------------
                         if cfg.info.parallel_port; parallel_port(3); end   % Send to NetStation
                         NetStation('Event','EVEN',tMovie, 0.001, 'stim',3); %NetStation('FlushReadbuffer');                        
-                        ev = logEvent(ev, event_, GetSecs(), NaN, 'DIN3', state, start_exp, 500);            
+                        ev = logEvent(ev, event_, GetSecs(), NaN, 'video_sent', state, start_exp, 500);            
                         % -------------------------------------------
                         % There is no need to hold the first frame since the first frame is already paused for 1 second in the video itself
                         % WaitSecs(1);  % Hold the first frame for 1.5 seconds (Not 1 sec?)
@@ -476,7 +476,7 @@ case 96
                 if ok
                     if cfg.info.parallel_port; parallel_port(31); end
                     NetStation('Event','EVEN',tResp, 0.001, 'resp',31); %NetStation('FlushReadbuffer');
-                    ev = logEvent(ev, event_, tResp, NaN, 'DI31', 31, start_exp, 500);
+                    ev = logEvent(ev, event_, tResp, NaN, 'question', 31, start_exp, 500);
                     event_ = event_ + 1;
                 end
 
@@ -500,7 +500,7 @@ case 96
             % -------------------------------------------
             if cfg.info.parallel_port; parallel_port(7); end   % Send to NetStation
             NetStation('Event','EVEN',BlankTime, 0.001, 'blan',5); %NetStation('FlushReadbuffer');   %May be 7 instead of 5                                                                               
-            ev = logEvent(ev, event_, GetSecs(), NaN, 'DIN7', state, start_exp, 500);                            
+            ev = logEvent(ev, event_, GetSecs(), NaN, 'blank', state, start_exp, 500);                            
             % -------------------------------------------
             WaitSecs(1);
             % ------------------------------------------- End trial EL
@@ -525,7 +525,7 @@ end
 % -------------------------------------------------------------------------
 ShowCursor();
 if cfg.info.parallel_port; parallel_port(10); end   % Send end event to NetStation
-ev = logEvent(ev, event_, GetSecs(), 0, 'DI10', state, start_exp, 500);                            
+ev = logEvent(ev, event_, GetSecs(), 0, 'end', state, start_exp, 500);                            
 
 
 % -------------------------------------------------------------------------
@@ -585,7 +585,7 @@ eventTable = table( ...
     ev.values', ...
     ev.samples', ...
     ev.time', ...
-    'VariableNames', {'onset', 'duration', 'trial_type', 'value', 'sample', 'time'});
+    'VariableNames', {'onset', 'duration', 'trial_type', 'state', 'getSecs', 'time'});
 % Remove rows with no event type (unused events)
 emptyRows = cellfun(@isempty, eventTable.trial_type);
 eventTable(emptyRows, :) = [];

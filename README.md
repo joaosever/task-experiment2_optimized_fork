@@ -20,8 +20,7 @@ Task created and performed for the indoor video experiment (experiment nº2) of 
 
 %Pôr som
 %Pôr datetime ao milisegundo
-%Resolver ev 
 %Trata do CAD
 
-%Para depois do pilot
+%Para depois do pilot:
 %Trata dos latin squares
