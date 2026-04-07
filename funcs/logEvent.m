@@ -1,24 +1,32 @@
-function ev = logEvent(ev, idx, evtStart, evtDuration, evtType, evtValue, start_exp, fs)
-%LOGEVENT Store one event in the event struct.
-%
-%   ev           : event struct
-%   idx          : event index (event_)
-%   evtStart     : GetSecs timestamp of event onset
-%   evtDuration  : Duration OR NaN (NaN -> computed at end; 0 -> instantaneous)
-%   evtType      : string label, e.g. 'DI98'
-%   evtValue     : numeric code, e.g. 98
-%   start_exp    : experiment start timestamp (GetSecs)
-%   fs           : sampling rate (e.g., 500 Hz)
+function ev = logEvent(ev, eventIdx, onsetTime, value, typeName, stateCode, startExp, duration)
+    % Log a single event in the event structure
+    %
+    % Inputs:
+    %   ev         - struct containing all event fields
+    %   eventIdx   - index of the event to log
+    %   onsetTime  - GetSecs() or event timestamp
+    %   value      - numeric value to store (optional)
+    %   typeName   - string describing the event type
+    %   stateCode  - numeric code for the event
+    %   startExp   - experiment start time (GetSecs)
+    %   duration   - duration of the event in seconds
+    %
+    % Outputs:
+    %   ev         - updated struct with event logged
 
-    onsetSec            = evtStart - start_exp;
+    if nargin < 8
+        duration = NaN;
+    end
 
-    ev.onsets(idx)      = onsetSec;
-    ev.time{idx}        = datetime('now');
-    ev.types{idx}       = evtType;
-    ev.values(idx)      = evtValue;
-    ev.samples(idx)     = round(onsetSec * fs);
+    ev.onsets(eventIdx)    = onsetTime - startExp; % relative to experiment start
+    ev.durations(eventIdx) = duration;
+    ev.types{eventIdx}     = typeName;
+    ev.values(eventIdx)    = value;
+    ev.samples(eventIdx)   = NaN;
 
-    % Duration provided manually (0 or a positive number) OR NaN to mark "compute later"
-    ev.durations(idx)   = evtDuration;
+    % Store current time with milliseconds
+    ev.time{eventIdx} = datetime('now', 'Format', 'dd-MMM-yyyy HH:mm:ss.SSS');
 
+    % Optional: store state if needed
+    ev.states(eventIdx) = stateCode;
 end

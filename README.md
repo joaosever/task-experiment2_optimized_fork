@@ -18,8 +18,6 @@ Task created and performed for the indoor video experiment (experiment nº2) of 
 
 %TO DO:
 
-%Pôr som
-%Pôr datetime ao milisegundo
 %Trata do bitalino
 
 %Para depois do pilot:
