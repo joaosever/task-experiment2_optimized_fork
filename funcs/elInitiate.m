@@ -17,7 +17,7 @@ function [window, rect, el] = elInitiate(cfg, edfFile)
 if ~IsOctave; commandwindow; end
 
 % Initialize PsychSound for calibration/validation audio feedback
-InitializePsychSound();
+InitializePsychSound(1);
 
 % Use default cfg.screen.number if none specified
 if (nargin < 1)

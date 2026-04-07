@@ -1,6 +1,8 @@
 function cfg = settings_main()
 % function containing settings for running the main task
 
+PsychPortAudio('GetDevices')
+InitializePsychSound(1);
 
 % Init pc-specific paths and variables via setpath
 cfg = setpath();
@@ -340,13 +342,19 @@ if cfg.stim.isVideo
     disp('Preloading videos...')
     cfg.stim.moviePntrs = zeros(numel(cfg.sequences.files),1);
 
-    for t = 1:numel(cfg.sequences.files)
-        file = fullfile(cfg.paths.stim_path, cfg.sequences.files{t});
-        cfg.stim.moviePntrs(t) = Screen('OpenMovie', cfg.screen.pointer, file,0,inf,2);
-        Screen('SetMovieTimeIndex', cfg.stim.moviePntrs(t), 0);
-    end
-    cfg.stim.preloaded = true;
+for t = 1:numel(cfg.sequences.files)
+    file = fullfile(cfg.paths.stim_path, cfg.sequences.files{t});
+    % Open the movie with audio channels
+    [movie, ~, audioFreq, audioChannels] = Screen('OpenMovie', cfg.screen.pointer, file);
+    cfg.stim.moviePntrs(t) = movie;
+
+    % Store audio info
+    cfg.stim.audioFreq(t) = audioFreq;
+    cfg.stim.audioChannels(t) = audioChannels;
+
+    Screen('SetMovieTimeIndex', movie, 0);
 end
+cfg.stim.preloaded = true;
 
 % Save cfg to .mat and .json (optional)
 

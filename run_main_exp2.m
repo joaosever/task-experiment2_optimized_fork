@@ -19,7 +19,7 @@ cleanupObj = onCleanup(@() taskCleanup());
 cfg = settings_main(); 
 
 %Prepare port for bitalino
-s = serialport("COM1",115200);
+%s = serialport("COM1",115200);
 
 % Prelim
 HideCursor();
@@ -318,125 +318,78 @@ case 96
 %                             Video
 % -------------------------------------------------------------------------
  
-        case 3
-            % important to select the correct sequence of videos
-            videoFile    = cfg.sequences.files{trial_}; 
-            file         = fullfile(cfg.paths.stim_path, videoFile);
-            stim{trial_} = videoFile;
-            fprintf('Stimulus - %s; Trial nº %d\n',videoFile, trial_);
-            fprintf('Time elapsed since beginning: %f minutes\n', (GetSecs()-start_exp)/60);
-
-            % Eyelink setup
-            % elCheckRecording(el,edfFileName,cfg.screen.pointer); % Check if everything is fine
-            Eyelink('Message', strcat('STIM_ONSET_',videoFile));
-
-            if cfg.stim.preloaded % recommended
-
-                movie = cfg.stim.moviePntrs(trial_);
-                Screen('SetMovieTimeIndex', movie, 0);
-                Screen('PlayMovie', movie, 1);
-            
-                tex = 0;
-                firstFrameDisplayed = false;
-                
-                % The following while loop finishes if a key is touched
-                while tex ~= -1 %&& ~KbCheck() 
-                    tex = Screen('GetMovieImage', cfg.screen.pointer, movie, 1);
-                    if tex > 0
-                        Screen('DrawTexture', cfg.screen.pointer, tex, [], cfg.screen.stim);
-                        
-                        % ---- capture timing from the flip ----
-                        [InitialDisplayTime, StimulusOnsetTime, FlipTimestamp, Missed, Beampos] = Screen('Flip', cfg.screen.pointer);
-                
-                        % ---- SEND EVENT EXACTLY ON FIRST FRAME ----
-                        if ~firstFrameDisplayed
-                            if cfg.info.parallel_port; parallel_port(3); end   % Send to NetStation
-                            NetStation('Event','EVEN',InitialDisplayTime, 0.001, 'stim',state); %NetStation('FlushReadbuffer');           
-                            Eyelink('Message', sprintf('EEG_SYNCH_%d', state)) % for post-hoc EEG synch
-                            ev = logEvent(ev, event_, GetSecs(), NaN, 'video', state, start_exp, 500);            
-                            firstFrameDisplayed = true;
-                        end
-                        % Log flips (useful for videos)
-                        [flipLog, flipIdx] = logFlip(...
-                            flipLog, flipIdx, ...         % struct + index
-                            state, ...                    % your event code
-                            InitialDisplayTime, ...
-                            StimulusOnsetTime, ...
-                            FlipTimestamp, ...
-                            Missed, ...
-                            Beampos ...
-                        );  
-                        Screen('Close', tex);
-                    end
-                end
-            
-                Screen('PlayMovie', movie, 0);
-                Screen('CloseMovie', movie);
-
-            else
-
-                try
-                    % Open the movie, start playback paused
-                    movie = Screen('OpenMovie', cfg.screen.pointer, file,0,inf,2);
-                    Screen('SetMovieTimeIndex', movie, 0);  %Ensure the movie starts at the very beginning
+    case 3
+        videoFile    = cfg.sequences.files{trial_}; 
+        file         = fullfile(cfg.paths.stim_path, videoFile);
+        stim{trial_} = videoFile;
     
-                    % Get the first frame and display it
-                    tex = Screen('GetMovieImage', cfg.screen.pointer, movie, 1, 0);
-                    if tex > 0  % If a valid texture was returned
-                        Screen('DrawTexture', cfg.screen.pointer, tex, [], cfg.screen.stim);  % Draw the texture on the screen
-                        tMovie = Screen('Flip', cfg.screen.pointer);  % Update the screen to show the first frame
-                        % -------------------------------------------
-                        if cfg.info.parallel_port; parallel_port(3); end   % Send to NetStation
-                        NetStation('Event','EVEN',tMovie, 0.001, 'stim',3); %NetStation('FlushReadbuffer');                        
-                        ev = logEvent(ev, event_, GetSecs(), NaN, 'video_sent', state, start_exp, 500);            
-                        % -------------------------------------------
-                        % There is no need to hold the first frame since the first frame is already paused for 1 second in the video itself
-                        % WaitSecs(1);  % Hold the first frame for 1.5 seconds (Not 1 sec?)
-                        Screen('Close', tex);  % Close the texture
-                        event_ = event_ + 1;
-                    end
+        Eyelink('Message', strcat('STIM_ONSET_', videoFile));
     
-                    % Continue playing movie from the first frame
-                    Screen('PlayMovie', movie, 1, 0);  % Start playback at normal speed from the current position
-                    % -------------------------------------------
-                    if cfg.info.parallel_port; parallel_port(4); end   % Send to NetStation
-                    NetStation('Event','EVEN',GetSecs() - start_exp, 0.001, 'stim',4); %NetStation('FlushReadbuffer');                                        
-                    ev = logEvent(ev, event_, GetSecs(), NaN, 'DIN4', state, start_exp, 500);            
-                    % -------------------------------------------
-                    % Further video playback code handling remains unchanged as per your original setup
-                catch ME
-                    disp(['Failed to open movie file: ', file]);
-                    rethrow(ME);
+        % -------------------------------
+        % Step 1: Read audio from movie
+        % -------------------------------
+        try
+            [audioData, fs] = audioread(file); % use the movie's audio track
+            nrAudioChannels = size(audioData,2);
+            disp(['Audio channels detected: ', num2str(nrAudioChannels)]);
+            % Start audio playback asynchronously
+            sound(audioData, fs);
+        catch
+            warning('Audio not found or could not be played');
+        end
+    
+        % -------------------------------
+        % Step 2: Open movie for video
+        % -------------------------------
+        if cfg.stim.preloaded
+            movie = cfg.stim.moviePntrs(trial_);
+            Screen('SetMovieTimeIndex', movie, 0);
+        else
+            [movie, ~, ~, ~, ~, ~, ~] = Screen('OpenMovie', cfg.screen.pointer, file);
+            Screen('SetMovieTimeIndex', movie, 0);
+        end
+    
+        Screen('PlayMovie', movie, 1, 0, 1.0); % play once, normal speed
+    
+        tex = 0;
+        firstFrameDisplayed = false;
+    
+        % -------------------------------
+        % Step 3: Playback loop
+        % -------------------------------
+        while tex ~= -1
+            tex = Screen('GetMovieImage', cfg.screen.pointer, movie, 1);
+            if tex > 0
+                Screen('DrawTexture', cfg.screen.pointer, tex, [], cfg.screen.stim);
+                [InitialDisplayTime, StimulusOnsetTime, FlipTimestamp, Missed, Beampos] = Screen('Flip', cfg.screen.pointer);
+                Screen('Close', tex);
+    
+                if ~firstFrameDisplayed
+                    firstFrameDisplayed = true;
+                    if cfg.info.parallel_port; parallel_port(3); end
+                    NetStation('Event','EVEN',InitialDisplayTime, 0.001,'stim',3);
+                    ev = logEvent(ev, event_, GetSecs(), NaN, 'video_pre', 3, start_exp, 500);
+                    event_ = event_ + 1;
                 end
-
-                % Play and display the movie
-                tex = 0;
-                while ~KbCheck && tex~=-1  % Continue until keyboard press or movie ends
-                    [tex, ~] = Screen('GetMovieImage', cfg.screen.pointer, movie, 1);
-                    if tex > 0  % If a valid texture was returned
-                        % Draw the texture on the screen
-                        Screen('DrawTexture', cfg.screen.pointer, tex, [], cfg.screen.stim);
-                        % Update the screen to show the current frame
-                        Screen('Flip', cfg.screen.pointer);
-                        % Release the texture
-                        Screen('Close', tex);
-                    end
-                end
-                    
-                % -------------------------------------------
-                Screen('PlayMovie', movie, 0); % Stop playback
-                Screen('CloseMovie', movie);
-
+    
+                [flipLog, flipIdx] = logFlip(flipLog, flipIdx, 3, InitialDisplayTime, StimulusOnsetTime, FlipTimestamp, Missed, Beampos);
             end
-
-            % -------------------------------------------
-            Eyelink('Message', strcat('STIM_OFFSET_',videoFile))
-            % WaitSecs(0.1);
-            % Eyelink('StopRecording');
-            % -------------------------------------------
-            event_ = event_ + 1;
-            state = 50;    
-
+    
+            [keyIsDown, ~, keyCode] = KbCheck;
+            if keyIsDown && keyCode(cfg.keys.keyX)
+                break
+            end
+        end
+    
+        Screen('PlayMovie', movie, 0);
+    
+        if ~cfg.stim.preloaded
+            Screen('CloseMovie', movie);
+        end
+    
+        Eyelink('Message', strcat('STIM_OFFSET_', videoFile));
+        event_ = event_ + 1;
+        state = 50;
 
 % -------------------------------------------------------------------------
 %                            Generic case 
@@ -480,7 +433,7 @@ case 96
                     if cfg.info.parallel_port; parallel_port(31); end
                     NetStation('Event','EVEN',tResp, 0.001, 'resp',31); %NetStation('FlushReadbuffer');
                     ev = logEvent(ev, event_, tResp, NaN, 'question', 31, start_exp, 500);
-                    write(s,uint8(1),"uint8");
+                    %write(s,uint8(1),"uint8");
                     event_ = event_ + 1;
                 end
 
@@ -544,6 +497,14 @@ NetStation('Disconnect')
 %                       Stop Eyetracker recording
 % -------------------------------------------------------------------------
  
+
+% Close all preloaded movies
+if isfield(cfg.stim, 'moviePntrs')
+    for i = 1:length(cfg.stim.moviePntrs)
+        Screen('CloseMovie', cfg.stim.moviePntrs(i));
+    end
+end
+
 elFinish(cfg);
 elCleanup();
 
@@ -617,7 +578,7 @@ if cfg.export.exportXlsx
     %writetable(flipTable, [cfg.paths.event_path filesep cfg.text.flipFileName '.xlsx']);
 end
 
-write(s,uint8(0),"uint8");
+%write(s,uint8(0),"uint8");
 
 
 % -------------------------------------------------------------------------
