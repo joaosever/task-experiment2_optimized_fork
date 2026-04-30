@@ -8,7 +8,7 @@ function generate_sequences(cfg)
     moveAvi         = false;
     createSequence  = true;
     method          = 'pre-built'; % {'real-time', 'pre-built'};
-    filesForEachRun = 1; % Files for each run (half)
+    filesForEachRun = 50; % Files for each run (half)
     numOfRuns       = 1; 
 
     

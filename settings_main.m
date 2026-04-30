@@ -224,7 +224,7 @@ cfg.text.eventSequence     = ['sub-',cfg.input{1},'_task-', cfg.text.taskname,'_
 cfg.task.description          = '';
 cfg.task.numberOfStates       = 10;
 cfg.task.numberOfRuns         = 1;
-cfg.task.stimsPerRun          = 1;
+cfg.task.stimsPerRun          = 50;
 cfg.task.eyes_closed_duration = 30; % in secs
 cfg.task.eyes_open_duration   = 30; % in secs
 cfg.task.preparation_duration = 5;  % in secs
@@ -331,7 +331,8 @@ end
 % Stimulus
 cfg.stim.isVideo = true;
 cfg.stim.preloaded = false;
-if cfg.stim.isVideo
+
+%if cfg.stim.isVideo
     % another recommendation is to process them all with ffmpeg
     % cache videos to improve performance
     % Videos standardized with ffmpeg
@@ -339,22 +340,22 @@ if cfg.stim.isVideo
     % ffmpeg -i input.mp4 -pix_fmt yuv420p -c:v libx264 -profile:v high -preset fast -crf 17 -r 30 -c:a aac -b:a 192k -movflags +faststart output.mp4
     % }
 
-    disp('Preloading videos...')
-    cfg.stim.moviePntrs = zeros(numel(cfg.sequences.files),1);
+    %disp('Preloading videos...')
+    %cfg.stim.moviePntrs = zeros(numel(cfg.sequences.files),1);
 
-for t = 1:numel(cfg.sequences.files)
-    file = fullfile(cfg.paths.stim_path, cfg.sequences.files{t});
+%for t = 1:numel(cfg.sequences.files)
+    %file = fullfile(cfg.paths.stim_path, cfg.sequences.files{t});
     % Open the movie with audio channels
-    [movie, ~, audioFreq, audioChannels] = Screen('OpenMovie', cfg.screen.pointer, file);
-    cfg.stim.moviePntrs(t) = movie;
+    %[movie, ~, audioFreq, audioChannels] = Screen('OpenMovie', cfg.screen.pointer, file);
+    %cfg.stim.moviePntrs(t) = movie;
 
     % Store audio info
-    cfg.stim.audioFreq(t) = audioFreq;
-    cfg.stim.audioChannels(t) = audioChannels;
+    %cfg.stim.audioFreq(t) = audioFreq;
+    %cfg.stim.audioChannels(t) = audioChannels;
 
-    Screen('SetMovieTimeIndex', movie, 0);
-end
-cfg.stim.preloaded = true;
+    %Screen('SetMovieTimeIndex', movie, 0);
+%end
+%cfg.stim.preloaded = true;
 
 % Save cfg to .mat and .json (optional)
 

@@ -19,7 +19,7 @@ cleanupObj = onCleanup(@() taskCleanup());
 cfg = settings_main(); 
 
 %Prepare port for bitalino
-%s = serialport("COM1",115200);
+%s = serialport("COM11",115200);
 
 % Prelim
 HideCursor();
@@ -434,6 +434,8 @@ case 96
                     NetStation('Event','EVEN',tResp, 0.001, 'resp',31); %NetStation('FlushReadbuffer');
                     ev = logEvent(ev, event_, tResp, NaN, 'question', 31, start_exp, 500);
                     %write(s,uint8(1),"uint8");
+                    %pause(0.01);
+                    %write(s,uint8(0),"uint8");
                     event_ = event_ + 1;
                 end
 
@@ -578,7 +580,6 @@ if cfg.export.exportXlsx
     %writetable(flipTable, [cfg.paths.event_path filesep cfg.text.flipFileName '.xlsx']);
 end
 
-%write(s,uint8(0),"uint8");
 
 
 % -------------------------------------------------------------------------
